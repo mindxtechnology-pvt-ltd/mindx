@@ -1,21 +1,23 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import Layout from './components/layout/Layout';
 import SplashScreen from './components/layout/SplashScreen';
-import Home from './pages/Home';
-import Services from './pages/Services';
-import Products from './pages/Products';
-import Portfolio from './pages/Portfolio';
-import About from './pages/About';
-import Blog from './pages/Blog';
-import BlogPost from './pages/BlogPost';
-import Careers from './pages/Careers';
-import Contact from './pages/Contact';
-import ClientForm from './pages/ClientForm';
-import NotFound from './pages/NotFound';
-import PrivacyPolicy from './pages/PrivacyPolicy';
-import TermsOfService from './pages/TermsOfService';
-import CaseStudy from './pages/CaseStudy';
+
+// Code-split page components dynamically
+const Home = lazy(() => import('./pages/Home'));
+const Services = lazy(() => import('./pages/Services'));
+const Products = lazy(() => import('./pages/Products'));
+const Portfolio = lazy(() => import('./pages/Portfolio'));
+const CaseStudy = lazy(() => import('./pages/CaseStudy'));
+const About = lazy(() => import('./pages/About'));
+const Blog = lazy(() => import('./pages/Blog'));
+const BlogPost = lazy(() => import('./pages/BlogPost'));
+const Careers = lazy(() => import('./pages/Careers'));
+const Contact = lazy(() => import('./pages/Contact'));
+const ClientForm = lazy(() => import('./pages/ClientForm'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const TermsOfService = lazy(() => import('./pages/TermsOfService'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 function ScrollManager() {
   const { pathname, hash } = useLocation();
@@ -43,22 +45,24 @@ function App() {
       <Router>
       <ScrollManager />
       <Layout>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/services" element={<Services />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/portfolio" element={<Portfolio />} />
-          <Route path="/portfolio/:slug" element={<CaseStudy />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/blog" element={<Blog />} />
-          <Route path="/blog/:slug" element={<BlogPost />} />
-          <Route path="/careers" element={<Careers />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/start-project" element={<ClientForm />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/terms-of-service" element={<TermsOfService />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <Suspense fallback={<div className="min-h-screen bg-zinc-950" />}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/services" element={<Services />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/portfolio" element={<Portfolio />} />
+            <Route path="/portfolio/:slug" element={<CaseStudy />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<BlogPost />} />
+            <Route path="/careers" element={<Careers />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/start-project" element={<ClientForm />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms-of-service" element={<TermsOfService />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
       </Layout>
       
       {/* Floating WhatsApp Widget */}
