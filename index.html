@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/favicon-light.png" media="(prefers-color-scheme: light)" />
+    <link rel="icon" type="image/png" href="/favicon-dark.png" media="(prefers-color-scheme: dark)" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MindX Technologies | Premium Software Agency in Nepal</title>
+    <meta name="description" content="MindX Technologies is a premium software engineering agency based in Nepal. We build high-performance React web apps, native mobile apps, and AI solutions for global clients." />
+    <meta name="keywords" content="Software Agency Nepal, React Development, SaaS Builder, AI Solutions, Mobile App Development Kathmandu, MERN Stack" />
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400..800;1,400..800&display=swap" rel="stylesheet">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="MindX Technologies | Premium Software Agency" />
+    <meta property="og:description" content="We engineer scalable digital products and AI solutions for global startups and enterprises." />
+    <meta property="og:image" content="https://mindx.technology/logo.jpeg" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="MindX Technologies | Premium Software Agency" />
+    <meta name="twitter:description" content="We engineer scalable digital products and AI solutions for global startups and enterprises." />
+    <meta name="twitter:image" content="https://mindx.technology/logo.jpeg" />
+    <script>
+      (function() {
+        const theme = localStorage.getItem('theme') || 'light';
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
+  </head>
+  <body class="font-sans bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 antialiased selection:bg-blue-500 selection:text-white">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

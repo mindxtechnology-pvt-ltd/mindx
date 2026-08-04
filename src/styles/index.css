@@ -1,0 +1,99 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+body {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-serif: 'Playfair Display', Georgia, Cambria, 'Times New Roman', Times, serif;
+}
+
+@layer base {
+  body {
+    @apply font-sans bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 antialiased overflow-x-hidden leading-relaxed;
+  }
+}
+
+@layer utilities {
+  .animate-gradient-x {
+    background-size: 200% 200%;
+    animation: gradient-x 4s ease infinite;
+  }
+}
+
+@keyframes gradient-x {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@layer components {
+  .container {
+    @apply w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  .section-padding {
+    @apply py-12 md:py-20;
+  }
+  .bg-gray-section {
+    @apply bg-zinc-100/50 dark:bg-zinc-900/50 border-y border-zinc-200 dark:border-zinc-800;
+  }
+  .heading-xl {
+    @apply text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight;
+  }
+  .heading-lg {
+    @apply text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight;
+  }
+  .heading-md {
+    @apply text-xl sm:text-2xl font-bold tracking-tight;
+  }
+  .heading-sm {
+    @apply text-lg font-semibold;
+  }
+  .text-lg {
+    @apply text-base md:text-lg text-zinc-600 dark:text-zinc-400;
+  }
+  .text-muted {
+    @apply text-zinc-600 dark:text-zinc-400;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center px-6 py-2.5 rounded-full font-semibold text-sm transition-all cursor-pointer;
+  }
+  .btn-primary {
+    @apply bg-blue-600 hover:bg-blue-500 text-white shadow-sm hover:shadow-md hover:-translate-y-0.5 border border-blue-500;
+  }
+  .btn-secondary {
+    @apply bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-zinc-900 dark:text-white border border-zinc-200 dark:border-zinc-800 hover:-translate-y-0.5 shadow-sm;
+  }
+  .btn-dark {
+    @apply bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-900 shadow-sm hover:shadow-md hover:-translate-y-0.5;
+  }
+  .card {
+    @apply p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 transition-all hover:border-blue-500/40 hover:-translate-y-1 hover:shadow-lg;
+  }
+  .bento-grid {
+    @apply grid grid-cols-1 md:grid-cols-12 gap-6;
+  }
+  .bento-item {
+    @apply p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 transition-all hover:border-blue-500/40 hover:-translate-y-1 hover:shadow-lg relative overflow-hidden flex flex-col justify-between;
+  }
+  .bento-col-12 { @apply md:col-span-12; }
+  .bento-col-8 { @apply md:col-span-8; }
+  .bento-col-6 { @apply md:col-span-6; }
+  .bento-col-4 { @apply md:col-span-4; }
+  .bento-col-3 { @apply md:col-span-3; }
+  .glass-pill {
+    @apply inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-semibold backdrop-blur-md transition-all hover:border-blue-500/40;
+  }
+}
+
+@layer utilities {
+  .ease-apple {
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .ease-spring {
+    transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+}
