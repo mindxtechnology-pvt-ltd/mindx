@@ -6,20 +6,29 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   build: {
-    chunkSizeWarningLimit: 2000,
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
             if (id.includes('framer-motion')) {
-              return 'framer-motion';
+              return 'vendor-framer-motion';
             }
             if (id.includes('lucide-react')) {
-              return 'lucide-react';
+              return 'vendor-lucide-icons';
             }
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
-              return 'vendor-react';
+            if (id.includes('@emailjs')) {
+              return 'vendor-emailjs';
             }
+            if (
+              id.includes('react') ||
+              id.includes('react-dom') ||
+              id.includes('react-router-dom') ||
+              id.includes('react-helmet-async')
+            ) {
+              return 'vendor-react-core';
+            }
+            return 'vendor-utils';
           }
         },
       },
