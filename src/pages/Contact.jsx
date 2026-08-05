@@ -120,27 +120,7 @@ export default function Contact() {
           </FadeIn>
         </div>
 
-        {/* Right Column: Advanced Premium Form */}
-        <FadeIn direction="left" delay={200} className="lg:col-span-7">
-          <div className="p-8 sm:p-12 rounded-[2.5rem] bg-white dark:bg-zinc-900/90 border border-zinc-200/80 dark:border-zinc-800/80 shadow-2xl backdrop-blur-xl relative overflow-hidden h-full flex flex-col justify-center">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 blur-[80px] rounded-full pointer-events-none"></div>
-            
-            <h3 className="text-3xl font-extrabold text-zinc-900 dark:text-white mb-3 tracking-tight">Send an Inquiry</h3>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-8 font-medium">We typically review technical inquiries within <span className="text-blue-600 dark:text-blue-400 font-bold">4 business hours</span>.</p>
 
-            <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
-              <input type="hidden" name="_subject" value="New Enterprise Inquiry from Mindx Tech!" />
-              <input type="hidden" name="_captcha" value="false" />
-              <input type="hidden" name="_template" value="table" />
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Your Name</label>
-                  <input type="text" name="Name" required placeholder="Executive / Founder Name" className="w-full px-5 py-4 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all font-medium shadow-inner" />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Work Email</label>
         {/* Right Column: Contact Form */}
         <div className="lg:col-span-7">
           <FadeIn direction="left" delay={200}>
