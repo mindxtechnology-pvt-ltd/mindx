@@ -1,9 +1,14 @@
 {
-  "outputDirectory": "public",
+  "builds": [
+    {
+      "src": "src/main.ts",
+      "use": "@vercel/node"
+    }
+  ],
   "rewrites": [
     {
       "source": "/api(.*)",
-      "destination": "/api/index.js"
+      "destination": "/src/main.ts"
     }
   ]
 }
