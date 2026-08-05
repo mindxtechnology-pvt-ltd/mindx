@@ -19,6 +19,11 @@ const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const TermsOfService = lazy(() => import('./pages/TermsOfService'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
+// Admin Panel Components
+const AdminLogin = lazy(() => import('./pages/Admin/Login'));
+const AdminDashboard = lazy(() => import('./pages/Admin/Dashboard'));
+
+
 function ScrollManager() {
   const { pathname, hash } = useLocation();
 
@@ -60,6 +65,11 @@ function App() {
             <Route path="/start-project" element={<ClientForm />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-of-service" element={<TermsOfService />} />
+            
+            {/* Admin Routes */}
+            <Route path="/admin" element={<AdminLogin />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>

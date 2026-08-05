@@ -1,6 +1,8 @@
 import { motion } from 'framer-motion';
 import { Mail } from 'lucide-react';
 import FadeIn from '../layout/FadeIn';
+import { useState, useEffect } from 'react';
+import { fetchTeam } from '../../utils/api';
 
 const TEAM_MEMBERS = [
   { 
@@ -43,6 +45,28 @@ const TEAM_MEMBERS = [
 ];
 
 export default function TeamSection() {
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadTeam() {
+      try {
+        const data = await fetchTeam();
+        const formatted = data.map(member => ({
+          ...member,
+          stack: member.stack ? member.stack.split(',').map(s => s.trim()) : []
+        }));
+        setTeamMembers(formatted);
+      } catch (err) {
+        console.error('Failed to fetch team from backend, falling back to local data', err);
+        setTeamMembers(TEAM_MEMBERS);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadTeam();
+  }, []);
+
   return (
     <section className="pt-12 pb-32 mb-12 relative w-full bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white flex flex-col items-center">
       
@@ -64,7 +88,7 @@ export default function TeamSection() {
 
         {/* Modern Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {TEAM_MEMBERS.map((member, index) => {
+          {teamMembers.map((member, index) => {
             let animProps = { direction: "up" };
             if (index === 0) animProps = { direction: "left" };
             else if (index === 1) animProps = { direction: "down" };

@@ -2,6 +2,8 @@ import { useParams, Link } from 'react-router-dom';
 import SEO from '../components/seo/SEO';
 import FadeIn from '../components/layout/FadeIn';
 import { ArrowLeft } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { fetchBlogBySlug } from '../utils/api';
 
 const blogDatabase = {
   'the-future-of-ai-in-saas': {
@@ -23,7 +25,10 @@ const blogDatabase = {
 
 export default function BlogPost() {
   const { slug } = useParams();
-  const post = blogDatabase[slug] || {
+  const [post, setPost] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fallbackPost = blogDatabase[slug] || {
     title: slug ? slug.replace(/-/g, ' ').toUpperCase() : 'Engineering Research',
     date: 'October 2026',
     author: 'Mindx Architects',
@@ -33,6 +38,33 @@ export default function BlogPost() {
       { type: 'p', text: 'This technical note explores advanced system architecture and frontend optimization strategies utilized across our production deployments.' }
     ]
   };
+
+  useEffect(() => {
+    async function loadPost() {
+      try {
+        const data = await fetchBlogBySlug(slug);
+        const formatted = {
+          ...data,
+          content: typeof data.content === 'string' ? JSON.parse(data.content) : data.content
+        };
+        setPost(formatted);
+      } catch (err) {
+        console.error('Failed to fetch blog post from API, using fallback data', err);
+        setPost(fallbackPost);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadPost();
+  }, [slug]);
+
+  if (isLoading) {
+    return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-zinc-500">Loading publication...</div>;
+  }
+
+  if (!post) {
+    return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-zinc-500">Publication not found.</div>;
+  }
 
   return (
     <div className="overflow-x-hidden text-zinc-900 dark:text-zinc-100 pt-4 pb-12 sm:pt-6 sm:pb-16 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">

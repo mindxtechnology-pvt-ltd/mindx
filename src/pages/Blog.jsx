@@ -2,9 +2,10 @@ import SEO from '../components/seo/SEO';
 import FadeIn from '../components/layout/FadeIn';
 import { ArrowRight, BookOpen, Mail, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { fetchBlogs } from '../utils/api';
 
-export default function Blog() {
-  const posts = [
+const DEFAULT_POSTS = [
     {
       title: 'The Future of AI in SaaS',
       date: 'October 12, 2026',
@@ -38,6 +39,25 @@ export default function Blog() {
       author: 'Nawaraj Karki'
     }
   ];
+
+export default function Blog() {
+  const [posts, setPosts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadBlogs() {
+      try {
+        const data = await fetchBlogs();
+        setPosts(data);
+      } catch (err) {
+        console.error('Failed to fetch blogs from API, falling back to local posts', err);
+        setPosts(DEFAULT_POSTS);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadBlogs();
+  }, []);
 
   return (
     <div className="overflow-x-hidden text-zinc-900 dark:text-zinc-100 pt-4 pb-12 sm:pt-6 sm:pb-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">

@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import FadeIn from './FadeIn';
 import { Menu, X, Sun, Moon, ArrowRight, Code, Smartphone, BrainCircuit, Cloud, ChevronDown } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
@@ -44,6 +44,26 @@ export default function Navbar() {
   const [activeDropdown, setActiveDropdown] = useState(null); // 'services' | 'company' | null
   const dropdownTimeout = useRef(null);
   const location = useLocation();
+  const navigate = useNavigate();
+  const [clickCount, setClickCount] = useState(0);
+  const [lastClickTime, setLastClickTime] = useState(0);
+
+  const handleLogoClick = (e) => {
+    const currentTime = Date.now();
+    // Click within 1.5 seconds
+    if (currentTime - lastClickTime < 1500) {
+      const newCount = clickCount + 1;
+      setClickCount(newCount);
+      if (newCount >= 4) {
+        e.preventDefault();
+        setClickCount(0);
+        navigate('/admin');
+      }
+    } else {
+      setClickCount(0);
+    }
+    setLastClickTime(currentTime);
+  };
 
   useEffect(() => {
     const theme = localStorage.getItem('theme') || 'light';
@@ -111,7 +131,7 @@ export default function Navbar() {
           <nav className={`bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800/80 rounded-full px-5 sm:px-6 py-2.5 flex items-center justify-between transition-all duration-300 ${scrolled ? 'shadow-xl shadow-zinc-900/10 dark:shadow-zinc-950/40' : 'shadow-md'
             }`}>
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2.5 text-xl font-extrabold tracking-tight text-zinc-900 dark:text-white shrink-0">
+            <Link to="/" onClick={handleLogoClick} className="flex items-center gap-2.5 text-xl font-extrabold tracking-tight text-zinc-900 dark:text-white shrink-0">
               <img src="/logo-icon-light.png" alt="MindX Icon" className="h-8 w-auto object-contain block dark:hidden" />
               <img src="/logo-icon-dark.png" alt="MindX Icon" className="h-8 w-auto object-contain hidden dark:block" />
               <span>MindX<span className="text-blue-600 dark:text-blue-400">.</span></span>

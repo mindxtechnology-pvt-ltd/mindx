@@ -2,7 +2,7 @@ import SEO from '../components/seo/SEO';
 import FadeIn from '../components/layout/FadeIn';
 import { ArrowRight, ShieldCheck, Zap, Lock } from 'lucide-react';
 import { useRef, useState } from 'react';
-import emailjs from '@emailjs/browser';
+import { submitMessage } from '../utils/api';
 import { checkRateLimit } from '../utils/rateLimiter';
 
 export default function ClientForm() {
@@ -23,51 +23,21 @@ export default function ClientForm() {
 
     const formData = new FormData(form.current);
     
-    // Map our detailed form fields to match the EmailJS template variables (Name, Email, Subject, Message)
-    const templateParams = {
-      Name: `${formData.get('First_Name')} ${formData.get('Last_Name')}`,
-      Email: formData.get('Email'),
-      Subject: `New Project Request: ${formData.get('Project_Type')}`,
-      Message: `Company/Startup: ${formData.get('Company') || 'N/A'}\nEstimated Budget: ${formData.get('Estimated_Budget')}\nTechnical Domain: ${formData.get('Project_Type')}\n\nTechnical Specifications:\n${formData.get('Description')}`
+    const payload = {
+      name: `${formData.get('First_Name')} ${formData.get('Last_Name')}`,
+      email: formData.get('Email'),
+      subject: `New Project Request: ${formData.get('Project_Type')}`,
+      message: `Company/Startup: ${formData.get('Company') || 'N/A'}\nEstimated Budget: ${formData.get('Estimated_Budget')}\nTechnical Domain: ${formData.get('Project_Type')}\n\nTechnical Specifications:\n${formData.get('Description')}`
     };
-    
-    let adminSuccess = false;
 
     try {
-      // 1. Send notification to Admin
-      await emailjs.send(
-        import.meta.env.VITE_EMAILJS_SERVICE_ID,
-        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
-        templateParams,
-        import.meta.env.VITE_EMAILJS_PUBLIC_KEY
-      );
-      adminSuccess = true;
-    } catch (error) {
-      console.error("Admin notification error:", error);
-      alert('Failed to transmit specifications to our team. Please check your connection or contact us directly.');
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (adminSuccess) {
-      try {
-        // 2. Send Auto-Reply to Client
-        if (import.meta.env.VITE_EMAILJS_AUTO_REPLY_TEMPLATE_ID) {
-          await emailjs.send(
-            import.meta.env.VITE_EMAILJS_SERVICE_ID,
-            import.meta.env.VITE_EMAILJS_AUTO_REPLY_TEMPLATE_ID,
-            templateParams,
-            import.meta.env.VITE_EMAILJS_PUBLIC_KEY
-          );
-        }
-      } catch (error) {
-        console.error("Auto-reply error:", error);
-        // We don't want to alert the user if only the auto-reply fails, 
-        // as the main notification went through.
-      }
-
+      await submitMessage(payload);
       alert("Success! Your technical specifications have been submitted. An architect will reach out shortly.");
       form.current.reset();
+    } catch (error) {
+      console.error("API submission error:", error);
+      alert('Failed to transmit specifications to our team. Please check your connection or contact us directly.');
+    } finally {
       setIsSubmitting(false);
     }
   };

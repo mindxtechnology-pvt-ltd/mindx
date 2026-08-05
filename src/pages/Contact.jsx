@@ -3,6 +3,7 @@ import FadeIn from '../components/layout/FadeIn';
 import { Mail, MapPin, Phone, Terminal, ArrowRight, ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
+import { submitMessage } from '../utils/api';
 
 export default function Contact() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -14,22 +15,17 @@ export default function Contact() {
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
 
+    const payload = {
+      name: data.Name,
+      email: data.Email,
+      message: data.Message,
+      subject: 'Discovery Call Request',
+    };
+
     try {
-      const response = await fetch("https://formsubmit.co/ajax/mindxtechnologyy@gmail.com", {
-        method: "POST",
-        headers: { 
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        },
-        body: JSON.stringify(data)
-      });
-      
-      if (response.ok) {
-        alert("Success! Your technical inquiry has been transmitted.");
-        e.target.reset();
-      } else {
-        alert("Failed to transmit inquiry. Please try again.");
-      }
+      await submitMessage(payload);
+      alert("Success! Your technical inquiry has been transmitted.");
+      e.target.reset();
     } catch (error) {
       console.error(error);
       alert("Failed to transmit inquiry. Please try again.");
