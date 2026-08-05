@@ -168,3 +168,49 @@ export async function deleteMember(id, token) {
   return response.json();
 }
 
+// Products APIs
+export async function fetchProducts() {
+  const response = await fetch(`${API_BASE_URL}/products`);
+  if (!response.ok) throw new Error('Failed to fetch products');
+  return response.json();
+}
+
+export async function createProduct(data, token) {
+  const response = await fetch(`${API_BASE_URL}/products`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.message || 'Failed to create product');
+  }
+  return response.json();
+}
+
+export async function updateProduct(id, data, token) {
+  const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) throw new Error('Failed to update product');
+  return response.json();
+}
+
+export async function deleteProduct(id, token) {
+  const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) throw new Error('Failed to delete product');
+  return response.json();
+}

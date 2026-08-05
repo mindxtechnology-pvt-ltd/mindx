@@ -1,6 +1,15 @@
 import SEO from '../components/seo/SEO';
 import FadeIn from '../components/layout/FadeIn';
-import { ArrowRight, Plane, ShoppingCart, Wallet, Lock } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { fetchProducts } from '../utils/api';
+import { ArrowRight, Plane, ShoppingCart, Wallet, Lock, Package, Loader2 } from 'lucide-react';
+
+const ICONS_MAP = {
+  Plane,
+  ShoppingCart,
+  Wallet,
+  Package
+};
 import { Link } from 'react-router-dom';
 
 export default function Products() {
@@ -61,9 +70,14 @@ export default function Products() {
         </FadeIn>
       </section>
 
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto pb-32">
+      {loading ? (
+        <div className="flex justify-center items-center py-20 text-zinc-500">
+          <Loader2 className="animate-spin" size={32} />
+        </div>
+      ) : (
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto pb-32">
         {products.map((product, i) => {
-          const Icon = product.icon;
+          const Icon = ICONS_MAP[product.icon] || Package;
           let animationProps = { direction: "up" };
           if (i === 0) animationProps = { direction: "left" };
           else if (i === 1) animationProps = { direction: "right" };
@@ -122,7 +136,7 @@ export default function Products() {
                       </span>
                     )}
 
-                    {product.metrics && (
+                    {product.metricsLabel && (
                       <div className="flex flex-col text-right">
                         <span className="text-[9px] text-zinc-400 font-bold uppercase tracking-widest">{product.metrics.label}</span>
                         <span className="text-sm font-extrabold text-zinc-900 dark:text-white">{product.metrics.value}</span>

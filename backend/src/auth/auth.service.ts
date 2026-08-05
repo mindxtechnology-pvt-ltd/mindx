@@ -142,6 +142,54 @@ export class AuthService implements OnModuleInit {
       }
       console.log('DEFAULT BLOG POSTS SEEDED');
     }
+
+    // 4. Seed Products
+    const productCount = await this.prisma.product.count();
+    if (productCount === 0) {
+      const defaultProducts = [
+        {
+          title: 'YatraMind',
+          tagline: 'The ultimate Nepal destination and booking intelligence.',
+          desc: 'An advanced travel application designed to explore, search, and book destinations across Nepal. It acts as a digital travel concierge, making it easier than ever to plan itineraries and manage bookings seamlessly.',
+          link: 'https://www.yatramind.app/',
+          icon: 'Plane',
+          image: '/images/yatramind_ui.png',
+          status: 'Live',
+          metricsLabel: 'Active Planners',
+          metricsValue: '15,000+',
+          domain: 'yatramind.app'
+        },
+        {
+          title: 'Fashion B2B',
+          tagline: 'Revolutionizing wholesale clothing trade.',
+          desc: 'A highly advanced B2B ecosystem designed specifically to make bulk clothes buying and selling easier and more efficient. It digitizes the entire supply chain, connecting manufacturers directly with retailers.',
+          link: '',
+          icon: 'ShoppingCart',
+          image: '/images/b2b_fashion_ui.png',
+          status: 'In Development',
+          metricsLabel: 'Projected GMV (Q4)',
+          metricsValue: '$2M+',
+          domain: 'fashionb2b.app'
+        },
+        {
+          title: 'DailoKhata',
+          tagline: 'Digital daily savings and collection ledger.',
+          desc: 'A revolutionary FinTech application built for organizations in Nepal to digitize daily money collections. It replaces physical ledgers, allowing field staff to record client savings instantly and securely on-the-go.',
+          link: '',
+          icon: 'Wallet',
+          image: '/images/dailokhata_ui.png',
+          status: 'Live',
+          metricsLabel: 'Active Orgs',
+          metricsValue: '120+',
+          domain: 'dailokhata.os'
+        }
+      ];
+
+      for (const product of defaultProducts) {
+        await this.prisma.product.create({ data: product });
+      }
+      console.log('DEFAULT PRODUCTS SEEDED');
+    }
   }
 
   async login(loginDto: LoginDto) {

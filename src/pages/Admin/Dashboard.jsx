@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { 
   fetchMessages, markAsRead, deleteMessage,
   fetchBlogs, createBlog, updateBlog, deleteBlog,
-  fetchTeam, createMember, updateMember, deleteMember 
+  fetchTeam, createMember, updateMember, deleteMember,
+  fetchProducts, createProduct, updateProduct, deleteProduct
 } from '../../utils/api';
 import { 
   LogOut, Trash2, MailOpen, Mail, Clock, RefreshCw, 
   ChevronRight, Inbox, Plus, Edit, Users, FileText, 
-  MailWarning, Loader2, ArrowRight
+  MailWarning, Loader2, ArrowRight, Package
 } from 'lucide-react';
 import SEO from '../../components/seo/SEO';
 
@@ -36,6 +37,16 @@ export default function Dashboard() {
   const [isTeamFormOpen, setIsTeamFormOpen] = useState(false);
   const [editingMemberId, setEditingMemberId] = useState(null);
 
+  const [products, setProducts] = useState([]);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isProductFormOpen, setIsProductFormOpen] = useState(false);
+  const [editingProductId, setEditingProductId] = useState(null);
+
+  const [products, setProducts] = useState([]);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isProductFormOpen, setIsProductFormOpen] = useState(false);
+  const [editingProductId, setEditingProductId] = useState(null);
+
   // Form states
   const [blogForm, setBlogForm] = useState({
     title: '', category: 'Engineering Deep Dive', readTime: '5 min read',
@@ -45,6 +56,18 @@ export default function Dashboard() {
   const [teamForm, setTeamForm] = useState({
     name: '', role: '', img: '/images/default.png',
     stack: '', github: '', email: '', linkedin: ''
+  });
+
+  const [productForm, setProductForm] = useState({
+    title: '', tagline: '', desc: '', link: '',
+    icon: 'Plane', image: '', status: 'Live',
+    metricsLabel: '', metricsValue: '', domain: ''
+  });
+
+  const [productForm, setProductForm] = useState({
+    title: '', tagline: '', desc: '', link: '',
+    icon: 'Plane', image: '', status: 'Live',
+    metricsLabel: '', metricsValue: '', domain: ''
   });
 
   const loadData = async () => {
@@ -63,6 +86,14 @@ export default function Dashboard() {
         const data = await fetchTeam();
         setTeam(data);
         if (data.length > 0 && !selectedMember) setSelectedMember(data[0]);
+      } else if (activeTab === 'products') {
+        const data = await fetchProducts();
+        setProducts(data);
+        if (data.length > 0 && !selectedProduct) setSelectedProduct(data[0]);
+      } else if (activeTab === 'products') {
+        const data = await fetchProducts();
+        setProducts(data);
+        if (data.length > 0 && !selectedProduct) setSelectedProduct(data[0]);
       }
     } catch (err) {
       console.error(err);
@@ -243,83 +274,120 @@ export default function Dashboard() {
     }
   };
 
+  // --- Product Actions ---
+  const openNewProductForm = () => {
+    setProductForm({
+      title: '', tagline: '', desc: '', link: '',
+      icon: 'Plane', image: '', status: 'Live',
+      metricsLabel: '', metricsValue: '', domain: ''
+    });
+    setEditingProductId(null);
+    setIsProductFormOpen(true);
+  };
+
+  const openEditProductForm = (product) => {
+    setProductForm({
+      title: product.title, tagline: product.tagline, desc: product.desc, link: product.link || '',
+      icon: product.icon, image: product.image, status: product.status,
+      metricsLabel: product.metricsLabel || '', metricsValue: product.metricsValue || '', domain: product.domain
+    });
+    setEditingProductId(product.id);
+    setIsProductFormOpen(true);
+  };
+
+  const handleProductSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    try {
+      if (editingProductId) {
+        await updateProduct(editingProductId, productForm, token);
+      } else {
+        await createProduct(productForm, token);
+      }
+      setIsProductFormOpen(false);
+      loadData();
+    } catch (err) {
+      setError(err.message || 'Failed to save product');
+    }
+  };
+
+  const handleDeleteProduct = async (id) => {
+    if (!confirm('Are you sure you want to delete this product?')) return;
+    try {
+      await deleteProduct(id, token);
+      const filtered = products.filter(p => p.id !== id);
+      setProducts(filtered);
+      setSelectedProduct(filtered.length > 0 ? filtered[0] : null);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+
+  // --- Product Actions ---
+  const openNewProductForm = () => {
+    setProductForm({
+      title: '', tagline: '', desc: '', link: '',
+      icon: 'Plane', image: '', status: 'Live',
+      metricsLabel: '', metricsValue: '', domain: ''
+    });
+    setEditingProductId(null);
+    setIsProductFormOpen(true);
+  };
+
+  const openEditProductForm = (product) => {
+    setProductForm({
+      title: product.title, tagline: product.tagline, desc: product.desc, link: product.link || '',
+      icon: product.icon, image: product.image, status: product.status,
+      metricsLabel: product.metricsLabel || '', metricsValue: product.metricsValue || '', domain: product.domain
+    });
+    setEditingProductId(product.id);
+    setIsProductFormOpen(true);
+  };
+
+  const handleProductSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    try {
+      if (editingProductId) {
+        await updateProduct(editingProductId, productForm, token);
+      } else {
+        await createProduct(productForm, token);
+      }
+      setIsProductFormOpen(false);
+      loadData();
+    } catch (err) {
+      setError(err.message || 'Failed to save product');
+    }
+  };
+
+  const handleDeleteProduct = async (id) => {
+    if (!confirm('Are you sure you want to delete this product?')) return;
+    try {
+      await deleteProduct(id, token);
+      const filtered = products.filter(p => p.id !== id);
+      setProducts(filtered);
+      setSelectedProduct(filtered.length > 0 ? filtered[0] : null);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const unreadCount = messages.filter(m => !m.isRead).length;
 
   return (
     <>
       <SEO title="Admin Workspace | MindX Technology" description="Secure workspace dashboard." />
-      <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col pt-20">
+      <div className="min-h-screen bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col pt-20">
         
         {/* Header */}
-        <header className="border-b border-zinc-900 bg-zinc-950/80 backdrop-blur-md px-6 py-4 flex items-center justify-between sticky top-0 z-20">
+        <header className="border-b border-zinc-200 dark:border-zinc-900 bg-white dark:bg-zinc-950/80 backdrop-blur-md px-6 py-4 flex items-center justify-between sticky top-0 z-20">
           <div className="flex items-center gap-4">
-            <h1 className="text-xl font-bold tracking-tight text-white">MindX Workspace</h1>
-            <div className="flex rounded-xl bg-zinc-900 p-1 border border-zinc-800">
-              <button
-                onClick={() => { setActiveTab('inquiries'); setSelectedMessage(null); }}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  activeTab === 'inquiries' ? 'bg-zinc-800 text-white shadow' : 'text-zinc-400 hover:text-white'
-                }`}
-              >
-                <Mail size={14} /> Inquiries {unreadCount > 0 && <span className="bg-blue-600 text-white rounded-full px-1.5 py-0.2 ml-0.5">{unreadCount}</span>}
-              </button>
-              <button
-                onClick={() => { setActiveTab('blogs'); setSelectedBlog(null); }}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  activeTab === 'blogs' ? 'bg-zinc-800 text-white shadow' : 'text-zinc-400 hover:text-white'
-                }`}
-              >
-                <FileText size={14} /> Insights Blog
-              </button>
-              <button
-                onClick={() => { setActiveTab('team'); setSelectedMember(null); }}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  activeTab === 'team' ? 'bg-zinc-800 text-white shadow' : 'text-zinc-400 hover:text-white'
-                }`}
-              >
-                <Users size={14} /> Team Members
-              </button>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <span className="hidden md:inline text-xs text-zinc-400 font-semibold uppercase tracking-wider">
-              Signed in: <strong className="text-white">{adminEmail}</strong>
-            </span>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-400 hover:text-white transition-colors bg-zinc-900 hover:bg-zinc-800 px-4 py-2.5 rounded-full border border-zinc-800 cursor-pointer"
-            >
-              <LogOut size={14} /> Log Out
-            </button>
-          </div>
-        </header>
-
-        {/* Content Body */}
-        <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
-          
-          {/* Main List Sidebar */}
-          <aside className="w-full md:w-5/12 border-r border-zinc-900 flex flex-col overflow-y-auto max-h-[calc(100vh-140px)]">
-            <div className="p-6 border-b border-zinc-900 flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-bold text-white flex items-center gap-2 uppercase tracking-wide">
-                  {activeTab === 'inquiries' ? 'Client Leads' : activeTab === 'blogs' ? 'Blog Posts' : 'Team Roster'}
-                </h2>
-                <p className="text-xs text-zinc-500 mt-1">
-                  {activeTab === 'inquiries' ? `${messages.length} inquiries received` : activeTab === 'blogs' ? `${blogs.length} articles published` : `${team.length} specialists active`}
-                </p>
-              </div>
-
-              <div className="flex gap-2">
-                {activeTab === 'blogs' && (
-                  <button
-                    onClick={openNewBlogForm}
-                    className="flex items-center gap-1 bg-white hover:bg-zinc-200 text-black text-xs font-bold px-3.5 py-2 rounded-xl transition-all cursor-pointer"
-                  >
-                    <Plus size={14} /> New Post
-                  </button>
-                )}
-                {activeTab === 'team' && (
+            <h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">MindX Workspace</h1>
+            <div className="flex rounded-xl bg-zinc-100 dark:bg-zinc-900 p-1 border border-zinc-300 dark:border-zinc-800">
+                                            {activeTab === 'team' && (
                   <button
                     onClick={openNewTeamForm}
                     className="flex items-center gap-1 bg-white hover:bg-zinc-200 text-black text-xs font-bold px-3.5 py-2 rounded-xl transition-all cursor-pointer"
@@ -327,9 +395,17 @@ export default function Dashboard() {
                     <Plus size={14} /> Add Member
                   </button>
                 )}
+                {activeTab === 'products' && (
+                  <button
+                    onClick={openNewProductForm}
+                    className="flex items-center gap-1 bg-white hover:bg-zinc-200 text-black text-xs font-bold px-3.5 py-2 rounded-xl transition-all cursor-pointer"
+                  >
+                    <Plus size={14} /> Add Product
+                  </button>
+                )}
                 <button
                   onClick={loadData}
-                  className="p-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                  className="p-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:text-white transition-colors cursor-pointer"
                   title="Refresh Data"
                 >
                   <RefreshCw size={14} />
@@ -338,24 +414,24 @@ export default function Dashboard() {
             </div>
 
             {isLoading ? (
-              <div className="flex-1 flex flex-col items-center justify-center p-12 text-zinc-500 gap-3">
+              <div className="flex-1 flex flex-col items-center justify-center p-12 text-zinc-500 dark:text-zinc-400 gap-3">
                 <Loader2 className="animate-spin text-blue-500" size={24} />
                 <p className="text-xs">Fetching workspace database...</p>
               </div>
             ) : error ? (
               <div className="p-6 text-center text-sm text-red-400">{error}</div>
             ) : activeTab === 'inquiries' && messages.length === 0 ? (
-              <div className="flex-1 flex flex-col items-center justify-center p-12 text-zinc-500 gap-3">
+              <div className="flex-1 flex flex-col items-center justify-center p-12 text-zinc-500 dark:text-zinc-400 gap-3">
                 <Inbox size={32} />
                 <p className="text-sm font-medium">No inquiries in registry.</p>
               </div>
             ) : activeTab === 'blogs' && blogs.length === 0 ? (
-              <div className="flex-1 flex flex-col items-center justify-center p-12 text-zinc-500 gap-3">
+              <div className="flex-1 flex flex-col items-center justify-center p-12 text-zinc-500 dark:text-zinc-400 gap-3">
                 <Inbox size={32} />
                 <p className="text-sm font-medium">No published blog posts.</p>
               </div>
             ) : activeTab === 'team' && team.length === 0 ? (
-              <div className="flex-1 flex flex-col items-center justify-center p-12 text-zinc-500 gap-3">
+              <div className="flex-1 flex flex-col items-center justify-center p-12 text-zinc-500 dark:text-zinc-400 gap-3">
                 <Inbox size={32} />
                 <p className="text-sm font-medium">No team members registered.</p>
               </div>
@@ -366,22 +442,22 @@ export default function Dashboard() {
                   <div
                     key={msg.id}
                     onClick={() => { setSelectedMessage(msg); if (!msg.isRead) handleMarkAsRead(msg.id); }}
-                    className={`p-6 cursor-pointer transition-all hover:bg-zinc-900/50 flex gap-4 ${
-                      selectedMessage?.id === msg.id ? 'bg-zinc-900/40 border-l-4 border-blue-500' : ''
-                    } ${!msg.isRead ? 'font-semibold text-white' : 'text-zinc-400'}`}
+                    className={`p-6 cursor-pointer transition-all hover:bg-zinc-100 dark:bg-zinc-900/50 flex gap-4 ${
+                      selectedMessage?.id === msg.id ? 'bg-zinc-100 dark:bg-zinc-900/40 border-l-4 border-blue-500' : ''
+                    } ${!msg.isRead ? 'font-semibold text-zinc-900 dark:text-white' : 'text-zinc-600 dark:text-zinc-400'}`}
                   >
                     <div className="mt-1">
                       {msg.isRead ? <MailOpen size={16} className="text-zinc-600" /> : <Mail size={16} className="text-blue-400" />}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">
-                        <h4 className="text-sm font-bold truncate text-zinc-100">{msg.name}</h4>
-                        <span className="text-[10px] text-zinc-500 flex items-center gap-1 shrink-0 font-medium">
+                        <h4 className="text-sm font-bold truncate text-zinc-900 dark:text-zinc-100">{msg.name}</h4>
+                        <span className="text-[10px] text-zinc-500 dark:text-zinc-400 flex items-center gap-1 shrink-0 font-medium">
                           <Clock size={10} /> {new Date(msg.createdAt).toLocaleDateString()}
                         </span>
                       </div>
-                      <p className="text-xs text-zinc-400 font-semibold mt-1 truncate">{msg.subject || 'Discovery Call Request'}</p>
-                      <p className="text-xs text-zinc-500 mt-2 line-clamp-2 font-medium">{msg.message}</p>
+                      <p className="text-xs text-zinc-600 dark:text-zinc-400 font-semibold mt-1 truncate">{msg.subject || 'Discovery Call Request'}</p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2 line-clamp-2 font-medium">{msg.message}</p>
                     </div>
                     <ChevronRight size={14} className="self-center text-zinc-700" />
                   </div>
@@ -392,20 +468,20 @@ export default function Dashboard() {
                   <div
                     key={post.id}
                     onClick={() => { setSelectedBlog(post); setIsBlogFormOpen(false); }}
-                    className={`p-6 cursor-pointer transition-all hover:bg-zinc-900/50 flex gap-4 ${
-                      selectedBlog?.id === post.id ? 'bg-zinc-900/40 border-l-4 border-blue-500' : ''
+                    className={`p-6 cursor-pointer transition-all hover:bg-zinc-100 dark:bg-zinc-900/50 flex gap-4 ${
+                      selectedBlog?.id === post.id ? 'bg-zinc-100 dark:bg-zinc-900/40 border-l-4 border-blue-500' : ''
                     }`}
                   >
-                    <FileText size={16} className="text-zinc-500 mt-1 shrink-0" />
+                    <FileText size={16} className="text-zinc-500 dark:text-zinc-400 mt-1 shrink-0" />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">
-                        <h4 className="text-sm font-bold truncate text-zinc-100">{post.title}</h4>
-                        <span className="text-[10px] text-zinc-500 flex items-center gap-1 shrink-0 font-medium">
+                        <h4 className="text-sm font-bold truncate text-zinc-900 dark:text-zinc-100">{post.title}</h4>
+                        <span className="text-[10px] text-zinc-500 dark:text-zinc-400 flex items-center gap-1 shrink-0 font-medium">
                           {post.date}
                         </span>
                       </div>
                       <p className="text-xs text-blue-400 font-semibold mt-1">{post.category}</p>
-                      <p className="text-xs text-zinc-500 mt-2 line-clamp-2 font-medium">{post.desc}</p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2 line-clamp-2 font-medium">{post.desc}</p>
                     </div>
                     <ChevronRight size={14} className="self-center text-zinc-700" />
                   </div>
@@ -416,19 +492,39 @@ export default function Dashboard() {
                   <div
                     key={member.id}
                     onClick={() => { setSelectedMember(member); setIsTeamFormOpen(false); }}
-                    className={`p-6 cursor-pointer transition-all hover:bg-zinc-900/50 flex gap-4 items-center ${
-                      selectedMember?.id === member.id ? 'bg-zinc-900/40 border-l-4 border-blue-500' : ''
+                    className={`p-6 cursor-pointer transition-all hover:bg-zinc-100 dark:bg-zinc-900/50 flex gap-4 items-center ${
+                      selectedMember?.id === member.id ? 'bg-zinc-100 dark:bg-zinc-900/40 border-l-4 border-blue-500' : ''
                     }`}
                   >
                     <img 
                       src={member.img} 
                       alt={member.name} 
-                      className="w-10 h-10 rounded-full object-cover border border-zinc-800"
+                      className="w-10 h-10 rounded-full object-cover border border-zinc-300 dark:border-zinc-800"
                     />
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-bold text-zinc-100 truncate">{member.name}</h4>
+                      <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate">{member.name}</h4>
                       <p className="text-xs text-blue-400 font-semibold mt-0.5">{member.role}</p>
-                      <p className="text-[10px] text-zinc-500 mt-1 truncate font-medium">{member.stack}</p>
+                      <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-1 truncate font-medium">{member.stack}</p>
+                    </div>
+                    <ChevronRight size={14} className="self-center text-zinc-700" />
+                  </div>
+                ))}
+              
+                {/* 4. PRODUCTS LIST */}
+                {activeTab === 'products' && products.map((product) => (
+                  <div
+                    key={product.id}
+                    onClick={() => { setSelectedProduct(product); setIsProductFormOpen(false); }}
+                    className={`p-6 cursor-pointer transition-all hover:bg-zinc-100 dark:bg-zinc-900/50 flex gap-4 items-center ${
+                      selectedProduct?.id === product.id ? 'bg-zinc-100 dark:bg-zinc-900/40 border-l-4 border-blue-500' : ''
+                    }`}
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center shrink-0">
+                      <Package size={20} className="text-emerald-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate">{product.title}</h4>
+                      <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-1 truncate font-medium">{product.tagline}</p>
                     </div>
                     <ChevronRight size={14} className="self-center text-zinc-700" />
                   </div>
@@ -443,16 +539,16 @@ export default function Dashboard() {
             {/* TAB: INQUIRIES CONTAINER */}
             {activeTab === 'inquiries' && (
               selectedMessage ? (
-                <div className="max-w-2xl mx-auto space-y-8 bg-zinc-900/20 p-8 sm:p-10 rounded-[2rem] border border-zinc-900 shadow-xl relative overflow-hidden">
+                <div className="max-w-2xl mx-auto space-y-8 bg-zinc-100 dark:bg-zinc-900/20 p-8 sm:p-10 rounded-[2rem] border border-zinc-200 dark:border-zinc-900 shadow-xl relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/5 blur-[60px] rounded-full pointer-events-none"></div>
 
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-900 pb-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-200 dark:border-zinc-900 pb-6">
                     <div>
-                      <h2 className="text-2xl font-extrabold text-white tracking-tight">{selectedMessage.name}</h2>
+                      <h2 className="text-2xl font-extrabold text-zinc-900 dark:text-white tracking-tight">{selectedMessage.name}</h2>
                       <a href={`mailto:${selectedMessage.email}`} className="text-sm text-blue-400 hover:underline font-semibold mt-1 inline-block">
                         {selectedMessage.email}
                       </a>
-                      {selectedMessage.phone && <p className="text-xs text-zinc-500 mt-1 font-medium">Phone: {selectedMessage.phone}</p>}
+                      {selectedMessage.phone && <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 font-medium">Phone: {selectedMessage.phone}</p>}
                     </div>
 
                     <div className="flex gap-2">
@@ -468,23 +564,23 @@ export default function Dashboard() {
 
                   <div className="space-y-6">
                     <div>
-                      <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">Subject</span>
-                      <h3 className="text-base font-bold text-zinc-100 mt-1">{selectedMessage.subject || 'Discovery Call Request'}</h3>
+                      <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Subject</span>
+                      <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100 mt-1">{selectedMessage.subject || 'Discovery Call Request'}</h3>
                     </div>
                     <div>
-                      <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">Received</span>
-                      <p className="text-xs text-zinc-400 font-semibold mt-1">{new Date(selectedMessage.createdAt).toLocaleString()}</p>
+                      <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Received</span>
+                      <p className="text-xs text-zinc-600 dark:text-zinc-400 font-semibold mt-1">{new Date(selectedMessage.createdAt).toLocaleString()}</p>
                     </div>
-                    <div className="border-t border-zinc-900 pt-6">
-                      <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Message Specifications</span>
-                      <div className="text-sm leading-relaxed text-zinc-300 bg-zinc-950/50 p-6 rounded-2xl border border-zinc-900/50 whitespace-pre-wrap font-medium shadow-inner">
+                    <div className="border-t border-zinc-200 dark:border-zinc-900 pt-6">
+                      <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400 mb-2">Message Specifications</span>
+                      <div className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-950/50 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-900/50 whitespace-pre-wrap font-medium shadow-inner">
                         {selectedMessage.message}
                       </div>
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="h-full flex flex-col items-center justify-center text-zinc-500 gap-3">
+                <div className="h-full flex flex-col items-center justify-center text-zinc-500 dark:text-zinc-400 gap-3">
                   <Inbox size={36} className="text-zinc-800" />
                   <p className="text-xs font-semibold">Select a client lead to review specs.</p>
                 </div>
@@ -495,42 +591,42 @@ export default function Dashboard() {
             {activeTab === 'blogs' && (
               isBlogFormOpen ? (
                 // Add / Edit Blog Form
-                <div className="max-w-2xl mx-auto bg-zinc-900/20 p-8 sm:p-10 rounded-[2rem] border border-zinc-900 shadow-xl">
-                  <h3 className="text-xl font-bold text-white mb-6 uppercase tracking-wide">
+                <div className="max-w-2xl mx-auto bg-zinc-100 dark:bg-zinc-900/20 p-8 sm:p-10 rounded-[2rem] border border-zinc-200 dark:border-zinc-900 shadow-xl">
+                  <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-6 uppercase tracking-wide">
                     {editingBlogId ? 'Modify Insight Article' : 'Draft New Insight Article'}
                   </h3>
 
                   <form onSubmit={handleBlogSubmit} className="space-y-5">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">Title</label>
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Title</label>
                         <input
                           type="text" required
                           value={blogForm.title}
                           onChange={e => setBlogForm({...blogForm, title: e.target.value})}
                           placeholder="The Future of SaaS Databases"
-                          className="w-full px-4 py-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-white outline-none focus:ring-2 focus:ring-blue-500/50 font-medium"
+                          className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/50 font-medium"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">Author</label>
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Author</label>
                         <input
                           type="text" required
                           value={blogForm.author}
                           onChange={e => setBlogForm({...blogForm, author: e.target.value})}
                           placeholder="Nawaraj Karki"
-                          className="w-full px-4 py-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-white outline-none focus:ring-2 focus:ring-blue-500/50 font-medium"
+                          className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/50 font-medium"
                         />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">Category</label>
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Category</label>
                         <select
                           value={blogForm.category}
                           onChange={e => setBlogForm({...blogForm, category: e.target.value})}
-                          className="w-full px-4 py-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-white outline-none focus:ring-2 focus:ring-blue-500/50 font-medium"
+                          className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/50 font-medium"
                         >
                           <option>Engineering Deep Dive</option>
                           <option>Web Systems</option>
@@ -539,39 +635,39 @@ export default function Dashboard() {
                         </select>
                       </div>
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">Read Time</label>
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Read Time</label>
                         <input
                           type="text" required
                           value={blogForm.readTime}
                           onChange={e => setBlogForm({...blogForm, readTime: e.target.value})}
                           placeholder="6 min read"
-                          className="w-full px-4 py-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-white outline-none focus:ring-2 focus:ring-blue-500/50 font-medium"
+                          className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/50 font-medium"
                         />
                       </div>
                     </div>
 
                     <div className="space-y-1">
-                      <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">Short Summary</label>
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Short Summary</label>
                       <textarea
                         required rows={2}
                         value={blogForm.desc}
                         onChange={e => setBlogForm({...blogForm, desc: e.target.value})}
                         placeholder="A brief overview displayed in the blog listing cards..."
-                        className="w-full px-4 py-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-white outline-none focus:ring-2 focus:ring-blue-500/50 resize-none font-medium"
+                        className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/50 resize-none font-medium"
                       ></textarea>
                     </div>
 
                     <div className="space-y-1">
                       <div className="flex items-center justify-between">
-                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">Body Content</label>
-                        <span className="text-[9px] text-zinc-500 font-medium">Use ## for Section Headings</span>
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Body Content</label>
+                        <span className="text-[9px] text-zinc-500 dark:text-zinc-400 font-medium">Use ## for Section Headings</span>
                       </div>
                       <textarea
                         required rows={10}
                         value={blogForm.paragraphs}
                         onChange={e => setBlogForm({...blogForm, paragraphs: e.target.value})}
                         placeholder="Type paragraphs here. Separate paragraphs with double enters (empty line).&#10;&#10;## Subheading here&#10;Type subheading paragraph here..."
-                        className="w-full px-4 py-4 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-white outline-none focus:ring-2 focus:ring-blue-500/50 resize-y font-medium shadow-inner"
+                        className="w-full px-4 py-4 rounded-xl bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/50 resize-y font-medium shadow-inner"
                       ></textarea>
                     </div>
 
@@ -579,7 +675,7 @@ export default function Dashboard() {
                       <button
                         type="button"
                         onClick={() => setIsBlogFormOpen(false)}
-                        className="px-5 py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-zinc-400 hover:text-white font-bold cursor-pointer"
+                        className="px-5 py-3 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:text-white font-bold cursor-pointer"
                       >
                         Cancel
                       </button>
@@ -594,20 +690,20 @@ export default function Dashboard() {
                 </div>
               ) : selectedBlog ? (
                 // View Blog details
-                <div className="max-w-2xl mx-auto space-y-8 bg-zinc-900/20 p-8 sm:p-10 rounded-[2rem] border border-zinc-900 shadow-xl relative overflow-hidden">
-                  <div className="flex items-center justify-between border-b border-zinc-900 pb-6">
+                <div className="max-w-2xl mx-auto space-y-8 bg-zinc-100 dark:bg-zinc-900/20 p-8 sm:p-10 rounded-[2rem] border border-zinc-200 dark:border-zinc-900 shadow-xl relative overflow-hidden">
+                  <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-900 pb-6">
                     <div>
                       <span className="text-[10px] px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 font-bold uppercase tracking-wider">
                         {selectedBlog.category}
                       </span>
-                      <h2 className="text-xl font-extrabold text-white mt-3 tracking-tight leading-snug">{selectedBlog.title}</h2>
-                      <p className="text-xs text-zinc-500 mt-1 font-semibold">Published: {selectedBlog.date} &bull; Author: {selectedBlog.author} &bull; {selectedBlog.readTime}</p>
+                      <h2 className="text-xl font-extrabold text-zinc-900 dark:text-white mt-3 tracking-tight leading-snug">{selectedBlog.title}</h2>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 font-semibold">Published: {selectedBlog.date} &bull; Author: {selectedBlog.author} &bull; {selectedBlog.readTime}</p>
                     </div>
 
                     <div className="flex gap-2">
                       <button
                         onClick={() => openEditBlogForm(selectedBlog)}
-                        className="p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                        className="p-3 rounded-2xl bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:text-white transition-colors cursor-pointer"
                         title="Edit Article"
                       >
                         <Edit size={16} />
@@ -624,18 +720,18 @@ export default function Dashboard() {
 
                   <div className="space-y-6">
                     <div>
-                      <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Snippet Summary</span>
-                      <p className="text-xs text-zinc-300 italic font-medium leading-relaxed">{selectedBlog.desc}</p>
+                      <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400 mb-1">Snippet Summary</span>
+                      <p className="text-xs text-zinc-700 dark:text-zinc-300 italic font-medium leading-relaxed">{selectedBlog.desc}</p>
                     </div>
 
-                    <div className="border-t border-zinc-900 pt-6">
-                      <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-4">Article Content Preview</span>
-                      <div className="space-y-4 text-xs text-zinc-400 leading-relaxed font-normal bg-zinc-950/50 p-6 rounded-2xl border border-zinc-900/50">
+                    <div className="border-t border-zinc-200 dark:border-zinc-900 pt-6">
+                      <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400 mb-4">Article Content Preview</span>
+                      <div className="space-y-4 text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal bg-white dark:bg-zinc-950/50 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-900/50">
                         {(() => {
                           try {
                             const blocks = typeof selectedBlog.content === 'string' ? JSON.parse(selectedBlog.content) : selectedBlog.content;
                             return blocks.map((b, i) => {
-                              if (b.type === 'h2') return <h4 key={i} className="text-sm font-bold text-white pt-2">{b.text}</h4>;
+                              if (b.type === 'h2') return <h4 key={i} className="text-sm font-bold text-zinc-900 dark:text-white pt-2">{b.text}</h4>;
                               return <p key={i} className="mb-2">{b.text}</p>;
                             });
                           } catch (e) {
@@ -647,7 +743,7 @@ export default function Dashboard() {
                   </div>
                 </div>
               ) : (
-                <div className="h-full flex flex-col items-center justify-center text-zinc-500 gap-3">
+                <div className="h-full flex flex-col items-center justify-center text-zinc-500 dark:text-zinc-400 gap-3">
                   <Inbox size={36} className="text-zinc-800" />
                   <p className="text-xs font-semibold">Select an article to preview or modify.</p>
                 </div>
@@ -658,87 +754,87 @@ export default function Dashboard() {
             {activeTab === 'team' && (
               isTeamFormOpen ? (
                 // Add / Edit Team Form
-                <div className="max-w-2xl mx-auto bg-zinc-900/20 p-8 sm:p-10 rounded-[2rem] border border-zinc-900 shadow-xl">
-                  <h3 className="text-xl font-bold text-white mb-6 uppercase tracking-wide">
+                <div className="max-w-2xl mx-auto bg-zinc-100 dark:bg-zinc-900/20 p-8 sm:p-10 rounded-[2rem] border border-zinc-200 dark:border-zinc-900 shadow-xl">
+                  <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-6 uppercase tracking-wide">
                     {editingMemberId ? 'Update Specialist profile' : 'Onboard New Specialist'}
                   </h3>
 
                   <form onSubmit={handleTeamSubmit} className="space-y-5">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">Full Name</label>
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Full Name</label>
                         <input
                           type="text" required
                           value={teamForm.name}
                           onChange={e => setTeamForm({...teamForm, name: e.target.value})}
                           placeholder="Alex Mercer"
-                          className="w-full px-4 py-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-white outline-none focus:ring-2 focus:ring-blue-500/50 font-medium"
+                          className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/50 font-medium"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">Role / Designation</label>
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Role / Designation</label>
                         <input
                           type="text" required
                           value={teamForm.role}
                           onChange={e => setTeamForm({...teamForm, role: e.target.value})}
                           placeholder="Core Systems Architect"
-                          className="w-full px-4 py-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-white outline-none focus:ring-2 focus:ring-blue-500/50 font-medium"
+                          className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/50 font-medium"
                         />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">Image Asset URL</label>
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Image Asset URL</label>
                         <input
                           type="text" required
                           value={teamForm.img}
                           onChange={e => setTeamForm({...teamForm, img: e.target.value})}
                           placeholder="/images/default.png"
-                          className="w-full px-4 py-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-white outline-none focus:ring-2 focus:ring-blue-500/50 font-medium"
+                          className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/50 font-medium"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">Tech Stack (comma-separated)</label>
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Tech Stack (comma-separated)</label>
                         <input
                           type="text" required
                           value={teamForm.stack}
                           onChange={e => setTeamForm({...teamForm, stack: e.target.value})}
                           placeholder="Go, Rust, AWS"
-                          className="w-full px-4 py-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-white outline-none focus:ring-2 focus:ring-blue-500/50 font-medium"
+                          className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/50 font-medium"
                         />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">Email Address</label>
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Email Address</label>
                         <input
                           type="email"
                           value={teamForm.email}
                           onChange={e => setTeamForm({...teamForm, email: e.target.value})}
                           placeholder="alex@mindx.com"
-                          className="w-full px-4 py-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-white outline-none focus:ring-2 focus:ring-blue-500/50 font-medium"
+                          className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/50 font-medium"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">GitHub Link</label>
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">GitHub Link</label>
                         <input
                           type="url"
                           value={teamForm.github}
                           onChange={e => setTeamForm({...teamForm, github: e.target.value})}
                           placeholder="https://github.com/alex"
-                          className="w-full px-4 py-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-white outline-none focus:ring-2 focus:ring-blue-500/50 font-medium"
+                          className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/50 font-medium"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">LinkedIn Link</label>
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">LinkedIn Link</label>
                         <input
                           type="url"
                           value={teamForm.linkedin}
                           onChange={e => setTeamForm({...teamForm, linkedin: e.target.value})}
                           placeholder="https://linkedin.com/in/alex"
-                          className="w-full px-4 py-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-white outline-none focus:ring-2 focus:ring-blue-500/50 font-medium"
+                          className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/50 font-medium"
                         />
                       </div>
                     </div>
@@ -747,7 +843,7 @@ export default function Dashboard() {
                       <button
                         type="button"
                         onClick={() => setIsTeamFormOpen(false)}
-                        className="px-5 py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-zinc-400 hover:text-white font-bold cursor-pointer"
+                        className="px-5 py-3 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:text-white font-bold cursor-pointer"
                       >
                         Cancel
                       </button>
@@ -762,8 +858,8 @@ export default function Dashboard() {
                 </div>
               ) : selectedMember ? (
                 // View Member details
-                <div className="max-w-2xl mx-auto space-y-8 bg-zinc-900/20 p-8 sm:p-10 rounded-[2rem] border border-zinc-900 shadow-xl relative overflow-hidden">
-                  <div className="flex items-center justify-between border-b border-zinc-900 pb-6">
+                <div className="max-w-2xl mx-auto space-y-8 bg-zinc-100 dark:bg-zinc-900/20 p-8 sm:p-10 rounded-[2rem] border border-zinc-200 dark:border-zinc-900 shadow-xl relative overflow-hidden">
+                  <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-900 pb-6">
                     <div className="flex items-center gap-5">
                       <img 
                         src={selectedMember.img} 
@@ -771,7 +867,7 @@ export default function Dashboard() {
                         className="w-16 h-16 rounded-full object-cover border border-zinc-850"
                       />
                       <div>
-                        <h2 className="text-xl font-extrabold text-white tracking-tight">{selectedMember.name}</h2>
+                        <h2 className="text-xl font-extrabold text-zinc-900 dark:text-white tracking-tight">{selectedMember.name}</h2>
                         <p className="text-xs text-blue-400 font-semibold mt-0.5">{selectedMember.role}</p>
                       </div>
                     </div>
@@ -779,7 +875,7 @@ export default function Dashboard() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => openEditTeamForm(selectedMember)}
-                        className="p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                        className="p-3 rounded-2xl bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:text-white transition-colors cursor-pointer"
                         title="Edit Profile"
                       >
                         <Edit size={16} />
@@ -797,10 +893,10 @@ export default function Dashboard() {
                   <div className="space-y-6">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs font-medium">
                       <div className="space-y-1">
-                        <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">Expertise Core</span>
+                        <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Expertise Core</span>
                         <div className="flex flex-wrap gap-1.5 mt-1.5">
                           {selectedMember.stack.split(',').map((s, idx) => (
-                            <span key={idx} className="px-2.5 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 text-[10px] font-bold">
+                            <span key={idx} className="px-2.5 py-1 rounded bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 text-[10px] font-bold">
                               {s.trim()}
                             </span>
                           ))}
@@ -808,7 +904,7 @@ export default function Dashboard() {
                       </div>
 
                       <div className="space-y-2">
-                        <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">Credentials & Directories</span>
+                        <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Credentials & Directories</span>
                         <div className="space-y-1 text-zinc-450 mt-1 font-semibold text-xs">
                           {selectedMember.email && <div>Email: <a href={`mailto:${selectedMember.email}`} className="text-blue-400 hover:underline">{selectedMember.email}</a></div>}
                           {selectedMember.github && <div>GitHub: <a href={selectedMember.github} target="_blank" rel="noreferrer" className="text-blue-400 hover:underline">{selectedMember.github}</a></div>}
@@ -819,13 +915,225 @@ export default function Dashboard() {
                   </div>
                 </div>
               ) : (
-                <div className="h-full flex flex-col items-center justify-center text-zinc-500 gap-3">
+                <div className="h-full flex flex-col items-center justify-center text-zinc-500 dark:text-zinc-400 gap-3">
                   <Inbox size={36} className="text-zinc-800" />
                   <p className="text-xs font-semibold">Select a team specialist to preview or edit.</p>
                 </div>
               )
             )}
 
+
+            {/* TAB: PRODUCTS CONTAINER */}
+            {activeTab === 'products' && (
+              isProductFormOpen ? (
+                // Add / Edit Product Form
+                <div className="max-w-2xl mx-auto bg-zinc-100 dark:bg-zinc-900/20 p-8 sm:p-10 rounded-[2rem] border border-zinc-200 dark:border-zinc-900 shadow-xl">
+                  <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-6 uppercase tracking-wide">
+                    {editingProductId ? 'Update Product' : 'Add New Product'}
+                  </h3>
+
+                  <form onSubmit={handleProductSubmit} className="space-y-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Title</label>
+                        <input
+                          type="text" required
+                          value={productForm.title}
+                          onChange={e => setProductForm({...productForm, title: e.target.value})}
+                          placeholder="YatraMind"
+                          className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 font-medium"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Tagline</label>
+                        <input
+                          type="text" required
+                          value={productForm.tagline}
+                          onChange={e => setProductForm({...productForm, tagline: e.target.value})}
+                          placeholder="The ultimate booking intelligence."
+                          className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 font-medium"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Description</label>
+                      <textarea
+                        required rows={3}
+                        value={productForm.desc}
+                        onChange={e => setProductForm({...productForm, desc: e.target.value})}
+                        placeholder="Detailed explanation of the product..."
+                        className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 resize-none font-medium"
+                      ></textarea>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">App URL / Link</label>
+                        <input
+                          type="text"
+                          value={productForm.link}
+                          onChange={e => setProductForm({...productForm, link: e.target.value})}
+                          placeholder="https://yatramind.app"
+                          className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 font-medium"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Domain Label</label>
+                        <input
+                          type="text" required
+                          value={productForm.domain}
+                          onChange={e => setProductForm({...productForm, domain: e.target.value})}
+                          placeholder="yatramind.app"
+                          className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 font-medium"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="space-y-1">
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Icon Name</label>
+                        <select
+                          value={productForm.icon}
+                          onChange={e => setProductForm({...productForm, icon: e.target.value})}
+                          className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 font-medium"
+                        >
+                          <option value="Plane">Plane</option>
+                          <option value="ShoppingCart">ShoppingCart</option>
+                          <option value="Wallet">Wallet</option>
+                          <option value="Package">Package</option>
+                        </select>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Status</label>
+                        <select
+                          value={productForm.status}
+                          onChange={e => setProductForm({...productForm, status: e.target.value})}
+                          className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 font-medium"
+                        >
+                          <option value="Live">Live</option>
+                          <option value="In Development">In Development</option>
+                        </select>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Image Asset URL</label>
+                        <input
+                          type="text" required
+                          value={productForm.image}
+                          onChange={e => setProductForm({...productForm, image: e.target.value})}
+                          placeholder="/images/yatramind_ui.png"
+                          className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 font-medium"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Metrics Label</label>
+                        <input
+                          type="text"
+                          value={productForm.metricsLabel}
+                          onChange={e => setProductForm({...productForm, metricsLabel: e.target.value})}
+                          placeholder="Active Planners"
+                          className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 font-medium"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Metrics Value</label>
+                        <input
+                          type="text"
+                          value={productForm.metricsValue}
+                          onChange={e => setProductForm({...productForm, metricsValue: e.target.value})}
+                          placeholder="15,000+"
+                          className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500/50 font-medium"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-3">
+                      <button
+                        type="button"
+                        onClick={() => setIsProductFormOpen(false)}
+                        className="px-5 py-3 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:text-white font-bold cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-6 py-3 rounded-xl bg-white hover:bg-zinc-200 text-black text-xs font-bold cursor-pointer"
+                      >
+                        {editingProductId ? 'Save Product' : 'Add Product'}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              ) : selectedProduct ? (
+                // View Product details
+                <div className="max-w-2xl mx-auto space-y-8 bg-zinc-100 dark:bg-zinc-900/20 p-8 sm:p-10 rounded-[2rem] border border-zinc-200 dark:border-zinc-900 shadow-xl relative overflow-hidden">
+                  <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-900 pb-6">
+                    <div>
+                      <span className={`text-[10px] px-2.5 py-1 rounded-full border font-bold uppercase tracking-wider ${selectedProduct.status === 'Live' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-amber-500/10 border-amber-500/20 text-amber-400'}`}>
+                        {selectedProduct.status}
+                      </span>
+                      <h2 className="text-xl font-extrabold text-zinc-900 dark:text-white mt-3 tracking-tight">{selectedProduct.title}</h2>
+                      <p className="text-xs text-emerald-400 font-semibold mt-0.5">{selectedProduct.tagline}</p>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => openEditProductForm(selectedProduct)}
+                        className="p-3 rounded-2xl bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:text-white transition-colors cursor-pointer"
+                        title="Edit Product"
+                      >
+                        <Edit size={16} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteProduct(selectedProduct.id)}
+                        className="p-3 rounded-2xl bg-red-950/20 hover:bg-red-950/40 border border-red-900/30 text-red-400 hover:text-red-300 transition-colors cursor-pointer"
+                        title="Delete Product"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-6">
+                    <div>
+                      <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400 mb-1">Description</span>
+                      <p className="text-xs text-zinc-700 dark:text-zinc-300 font-medium leading-relaxed">{selectedProduct.desc}</p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 border-t border-zinc-200 dark:border-zinc-900 pt-6">
+                      {selectedProduct.metricsLabel && (
+                        <div>
+                          <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">{selectedProduct.metricsLabel}</span>
+                          <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 mt-1">{selectedProduct.metricsValue}</h3>
+                        </div>
+                      )}
+                      {selectedProduct.domain && (
+                        <div>
+                          <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Domain</span>
+                          <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 mt-2 flex items-center gap-1.5">
+                            <Link size={14} className="text-emerald-400" /> {selectedProduct.domain}
+                          </h3>
+                        </div>
+                      )}
+                    </div>
+
+                    {selectedProduct.image && (
+                      <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-900">
+                        <img src={selectedProduct.image} alt="UI Preview" className="w-full rounded-xl border border-zinc-300 dark:border-zinc-800 shadow-lg opacity-80 hover:opacity-100 transition-opacity" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="h-full flex flex-col items-center justify-center text-zinc-500 dark:text-zinc-400 gap-3">
+                  <Package size={36} className="text-zinc-800" />
+                  <p className="text-xs font-semibold">Select a product to preview or modify.</p>
+                </div>
+              )
+            )}
           </main>
         </div>
       </div>
