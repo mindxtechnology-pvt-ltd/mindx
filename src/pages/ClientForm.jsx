@@ -178,12 +178,7 @@ export default function ClientForm() {
                   </div>
                   <div className="space-y-2">
                     <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Estimated Budget Allocation *</label>
-                    <select required name="Estimated_Budget" className="w-full px-5 py-4 rounded-2xl bg-zinc-50 dark:bg-black/40 border border-zinc-200 dark:border-zinc-800/80 text-sm text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all font-medium cursor-pointer shadow-inner appearance-none">
-                      <option value="" className="bg-white dark:bg-zinc-900">Select estimated range (USD)...</option>
-                      <option value="$5k - $10k" className="bg-white dark:bg-zinc-900">$5,000 - $10,000 (MVP Prototype)</option>
-                      <option value="$10k - $50k" className="bg-white dark:bg-zinc-900">$10,000 - $50,000 (Growth Scaling)</option>
-                      <option value="$50k+" className="bg-white dark:bg-zinc-900">$50,000+ (Enterprise Architecture)</option>
-                    </select>
+                    <input required type="text" name="Estimated_Budget" placeholder="e.g. $10,000 USD or €15,000 EUR" className="w-full px-5 py-4 rounded-2xl bg-zinc-50 dark:bg-black/40 border border-zinc-200 dark:border-zinc-800/80 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all font-medium shadow-inner" />
                   </div>
                 </div>
 
