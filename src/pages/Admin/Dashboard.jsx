@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { 
   fetchMessages, markAsRead, deleteMessage,
   fetchBlogs, createBlog, updateBlog, deleteBlog,
-  fetchTeam, createMember, updateMember, deleteMember 
+  fetchTeam, createMember, updateMember, deleteMember,
+  fetchProducts, createProduct, updateProduct, deleteProduct
 } from '../../utils/api';
 import { 
   LogOut, Trash2, MailOpen, Mail, Clock, RefreshCw, 
   ChevronRight, Inbox, Plus, Edit, Users, FileText, 
-  MailWarning, Loader2, ArrowRight
+  MailWarning, Loader2, ArrowRight, Package, Link
 } from 'lucide-react';
 import SEO from '../../components/seo/SEO';
 
@@ -52,6 +53,12 @@ export default function Dashboard() {
     stack: '', github: '', email: '', linkedin: ''
   });
 
+  const [productForm, setProductForm] = useState({
+    title: '', tagline: '', desc: '', link: '',
+    icon: 'Plane', image: '', status: 'Live',
+    metricsLabel: '', metricsValue: '', domain: ''
+  });
+
   const loadData = async () => {
     setIsLoading(true);
     setError('');
@@ -68,6 +75,10 @@ export default function Dashboard() {
         const data = await fetchTeam();
         setTeam(data);
         if (data.length > 0 && !selectedMember) setSelectedMember(data[0]);
+      } else if (activeTab === 'products') {
+        const data = await fetchProducts();
+        setProducts(data);
+        if (data.length > 0 && !selectedProduct) setSelectedProduct(data[0]);
       }
     } catch (err) {
       console.error(err);
@@ -335,6 +346,14 @@ export default function Dashboard() {
               >
                 <Users size={14} /> Team Members
               </button>
+              <button
+                onClick={() => { setActiveTab('products'); setSelectedProduct(null); }}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  activeTab === 'products' ? 'bg-zinc-200 dark:bg-zinc-800 text-zinc-900 dark:text-white shadow' : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:text-white'
+                }`}
+              >
+                <Package size={14} /> Products
+              </button>
             </div>
           </div>
 
@@ -381,6 +400,14 @@ export default function Dashboard() {
                     className="flex items-center gap-1 bg-white hover:bg-zinc-200 text-black text-xs font-bold px-3.5 py-2 rounded-xl transition-all cursor-pointer"
                   >
                     <Plus size={14} /> Add Member
+                  </button>
+                )}
+                {activeTab === 'products' && (
+                  <button
+                    onClick={openNewProductForm}
+                    className="flex items-center gap-1 bg-white hover:bg-zinc-200 text-black text-xs font-bold px-3.5 py-2 rounded-xl transition-all cursor-pointer"
+                  >
+                    <Plus size={14} /> Add Product
                   </button>
                 )}
                 <button
@@ -485,6 +512,26 @@ export default function Dashboard() {
                       <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate">{member.name}</h4>
                       <p className="text-xs text-blue-400 font-semibold mt-0.5">{member.role}</p>
                       <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-1 truncate font-medium">{member.stack}</p>
+                    </div>
+                    <ChevronRight size={14} className="self-center text-zinc-700" />
+                  </div>
+                ))}
+              
+                {/* 4. PRODUCTS LIST */}
+                {activeTab === 'products' && products.map((product) => (
+                  <div
+                    key={product.id}
+                    onClick={() => { setSelectedProduct(product); setIsProductFormOpen(false); }}
+                    className={`p-6 cursor-pointer transition-all hover:bg-zinc-100 dark:bg-zinc-900/50 flex gap-4 items-center ${
+                      selectedProduct?.id === product.id ? 'bg-zinc-100 dark:bg-zinc-900/40 border-l-4 border-blue-500' : ''
+                    }`}
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center shrink-0">
+                      <Package size={20} className="text-emerald-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate">{product.title}</h4>
+                      <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-1 truncate font-medium">{product.tagline}</p>
                     </div>
                     <ChevronRight size={14} className="self-center text-zinc-700" />
                   </div>
