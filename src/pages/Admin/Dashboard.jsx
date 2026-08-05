@@ -9,7 +9,7 @@ import {
 import { 
   LogOut, Trash2, MailOpen, Mail, Clock, RefreshCw, 
   ChevronRight, Inbox, Plus, Edit, Users, FileText, 
-  MailWarning, Loader2, ArrowRight, Package, Link
+  MailWarning, Loader2, ArrowRight, Package, Link, Download
 } from 'lucide-react';
 import SEO from '../../components/seo/SEO';
 
@@ -104,6 +104,30 @@ export default function Dashboard() {
   const handleLogout = () => {
     localStorage.clear();
     navigate('/admin');
+  };
+
+  const exportEmailsToCSV = () => {
+    if (!messages || messages.length === 0) return;
+    const headers = ['Name', 'Email', 'Phone', 'Subject', 'Date', 'Message'];
+    const csvRows = [headers.join(',')];
+    messages.forEach(msg => {
+      const name = '"' + (msg.name || '').replace(/"/g, '""') + '"';
+      const email = '"' + (msg.email || '').replace(/"/g, '""') + '"';
+      const phone = '"' + (msg.phone || '').replace(/"/g, '""') + '"';
+      const subject = '"' + (msg.subject || '').replace(/"/g, '""') + '"';
+      const date = '"' + new Date(msg.createdAt).toLocaleDateString() + '"';
+      const message = '"' + (msg.message || '').replace(/"/g, '""') + '"';
+      csvRows.push([name, email, phone, subject, date, message].join(','));
+    });
+    const csvContent = csvRows.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'mindx_client_leads.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   // --- Message Actions ---
@@ -243,7 +267,8 @@ export default function Dashboard() {
       setIsTeamFormOpen(false);
       loadData();
     } catch (err) {
-      setError(err.message || 'Failed to save team member');
+      setError(err.message || 'Failed to initialize workspace data.');
+      setIsLoading(false);
     }
   };
 
@@ -392,6 +417,14 @@ export default function Dashboard() {
                     className="flex items-center gap-1 bg-white hover:bg-zinc-200 text-black text-xs font-bold px-3.5 py-2 rounded-xl transition-all cursor-pointer"
                   >
                     <Plus size={14} /> New Post
+                  </button>
+                )}
+                {activeTab === 'inquiries' && (
+                  <button
+                    onClick={exportEmailsToCSV}
+                    className="flex items-center gap-1 bg-white hover:bg-zinc-200 text-black text-xs font-bold px-3.5 py-2 rounded-xl transition-all cursor-pointer"
+                  >
+                    <Download size={14} /> Export CSV
                   </button>
                 )}
                 {activeTab === 'team' && (
