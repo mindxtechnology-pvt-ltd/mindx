@@ -1,12 +1,13 @@
 import SEO from '../components/seo/SEO';
 import FadeIn from '../components/layout/FadeIn';
-import { Mail, MapPin, Phone, Terminal, ArrowRight, ArrowUpRight } from 'lucide-react';
+import { Mail, MapPin, Phone, Terminal, ArrowRight, ArrowUpRight, CheckCircle2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { submitMessage } from '../utils/api';
 
 export default function Contact() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,7 +25,7 @@ export default function Contact() {
 
     try {
       await submitMessage(payload);
-      alert("Success! Your technical inquiry has been transmitted.");
+      setIsSubmitted(true);
       e.target.reset();
     } catch (error) {
       console.error(error);
@@ -140,24 +141,68 @@ export default function Contact() {
 
                 <div className="space-y-2">
                   <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Work Email</label>
-                  <input type="email" name="Email" required placeholder="alex@enterprise.com" className="w-full px-5 py-4 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all font-medium shadow-inner" />
+        {/* Right Column: Contact Form */}
+        <div className="lg:col-span-7">
+          <FadeIn direction="left" delay={200}>
+            {isSubmitted ? (
+              <div className="p-8 sm:p-12 rounded-[2.5rem] bg-white dark:bg-zinc-900/50 border border-zinc-200/80 dark:border-zinc-800/80 shadow-2xl backdrop-blur-xl relative overflow-hidden flex flex-col items-center justify-center text-center min-h-[500px]">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-green-500/10 blur-[80px] rounded-full pointer-events-none"></div>
+                
+                <div className="w-24 h-24 bg-green-50 dark:bg-green-500/10 rounded-full flex items-center justify-center mb-8 relative">
+                  <div className="absolute inset-0 bg-green-500/20 rounded-full animate-ping"></div>
+                  <CheckCircle2 size={48} className="text-green-600 dark:text-green-400 relative z-10" />
                 </div>
+                
+                <h3 className="text-3xl sm:text-4xl font-extrabold text-zinc-900 dark:text-white mb-4 tracking-tight">Message Sent</h3>
+                <p className="text-lg text-zinc-500 dark:text-zinc-400 max-w-md mx-auto mb-10 leading-relaxed">
+                  Your inquiry has been successfully transmitted to our team. We'll get back to you shortly.
+                </p>
+                
+                <button 
+                  onClick={() => setIsSubmitted(false)} 
+                  className="px-8 py-4 rounded-xl bg-zinc-100 dark:bg-zinc-800/80 text-zinc-900 dark:text-white text-sm font-bold tracking-widest uppercase hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+                >
+                  Send Another Message
+                </button>
               </div>
+            ) : (
+              <div className="p-8 sm:p-12 rounded-[2.5rem] bg-white dark:bg-zinc-900/50 border border-zinc-200/80 dark:border-zinc-800/80 shadow-xl backdrop-blur-xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 blur-[80px] rounded-full pointer-events-none"></div>
+                
+                <div className="mb-10 relative z-10">
+                  <h2 className="text-2xl font-extrabold text-zinc-900 dark:text-white mb-3">Send us a message</h2>
+                  <p className="text-zinc-500 dark:text-zinc-400">Fill out the form below and we'll get back to you within 24 hours.</p>
+                </div>
 
-              <div className="space-y-2">
-                <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Project Specifications</label>
-                <textarea name="Message" required rows={5} placeholder="Outline your technical requirements, timeline, or current infrastructure challenges..." className="w-full px-5 py-4 rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all font-medium shadow-inner resize-none"></textarea>
+                <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Full Name *</label>
+                    <input required type="text" name="Name" placeholder="John Doe" className="w-full px-5 py-4 rounded-2xl bg-zinc-50 dark:bg-black/40 border border-zinc-200 dark:border-zinc-800/80 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all font-medium shadow-inner" />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Email Address *</label>
+                    <input required type="email" name="Email" placeholder="john@company.com" className="w-full px-5 py-4 rounded-2xl bg-zinc-50 dark:bg-black/40 border border-zinc-200 dark:border-zinc-800/80 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all font-medium shadow-inner" />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Your Message *</label>
+                    <textarea required name="Message" rows={5} placeholder="How can we help you?" className="w-full px-5 py-4 rounded-2xl bg-zinc-50 dark:bg-black/40 border border-zinc-200 dark:border-zinc-800/80 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all font-medium shadow-inner resize-none"></textarea>
+                  </div>
+                  
+                  <div className="pt-4">
+                    <button type="submit" disabled={isSubmitting} className="group w-full py-5 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-black text-sm font-extrabold uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-95 shadow-lg shadow-zinc-900/20 dark:shadow-white/20 flex items-center justify-center gap-3 overflow-hidden relative disabled:opacity-50 disabled:cursor-not-allowed">
+                      <span className="relative z-10 flex items-center gap-2">
+                        {isSubmitting ? 'Sending...' : 'Send Message'} <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+                      </span>
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 opacity-0 group-hover:opacity-10 dark:group-hover:opacity-100 transition-opacity duration-500 mix-blend-overlay"></div>
+                    </button>
+                  </div>
+                </form>
               </div>
-
-              <button type="submit" disabled={isSubmitting} className="group w-full py-5 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-black text-sm font-extrabold uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-95 shadow-lg shadow-zinc-900/20 dark:shadow-white/20 flex items-center justify-center gap-3 overflow-hidden relative disabled:opacity-50 disabled:cursor-not-allowed">
-                <span className="relative z-10 flex items-center gap-2">
-                  {isSubmitting ? 'Transmitting...' : 'Transmit Inquiry'} <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
-                </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500 mix-blend-overlay"></div>
-              </button>
-            </form>
-          </div>
-        </FadeIn>
+            )}
+          </FadeIn>
+        </div>
       </section>
 
       {/* Advanced FAQ Section */}
