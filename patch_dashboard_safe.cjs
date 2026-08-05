@@ -1,5 +1,5 @@
 const fs = require('fs');
-let content = fs.readFileSync('src/pages/Admin/Dashboard.jsx', 'utf8');
+let content = fs.readFileSync('src/pages/Admin/Dashboard.jsx', 'utf8').replace(/\r\n/g, '\n');
 
 // 1. Add api imports
 content = content.replace(
