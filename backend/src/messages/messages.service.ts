@@ -18,12 +18,20 @@ export class MessagesService {
       data: createMessageDto,
     });
 
-    // 2. Send emails in the background (we won't await them to speed up response time)
-    this.sendEmails(createMessageDto).catch((err) => {
+    // 2. Send emails and wait for result for debugging
+    let emailStatus = 'sent';
+    try {
+      await this.sendEmails(createMessageDto);
+    } catch (err) {
       console.error('Failed to send emails via Resend:', err);
-    });
+      emailStatus = `failed: ${err.message || err}`;
+    }
 
-    return message;
+    return { 
+      ...message, 
+      emailStatus, 
+      apiKeyExists: !!process.env.RESEND_API_KEY 
+    };
   }
 
   private async sendEmails(dto: CreateMessageDto) {
