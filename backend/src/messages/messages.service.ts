@@ -36,7 +36,7 @@ export class MessagesService {
     await this.resend.emails.send({
       from: 'MindX Technology <info@mindxtechnology.com>',
       to: dto.email,
-      reply_to: this.adminEmail,
+      replyTo: this.adminEmail,
       subject: 'Thank you for contacting MindX Technology',
       html: `
         <div style="font-family: 'Plus Jakarta Sans', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #0c0a09; color: #fafaf9; border-radius: 12px; border: 1px solid #27272a;">
